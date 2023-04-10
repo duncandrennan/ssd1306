@@ -83,6 +83,35 @@ struct mgos_ssd1306 *mgos_ssd1306_create (const struct mgos_config_ssd1306 *cfg)
     goto out_err;
   }
 
+  mgos_ssd1306_startup(oled);
+  
+  return oled;
+
+out_err:
+  LOG (LL_ERROR, ("SSD1306 setup failed"));
+  free (oled);
+  return NULL;
+}
+
+void mgos_ssd1306_close (struct mgos_ssd1306 *oled) {
+  if (oled == NULL)
+    return;
+
+  _command (oled, 0xae);        // SSD_DISPLAYOFF
+  _command (oled, 0x8d);        // SSD1306_CHARGEPUMP
+  _command (oled, 0x10);        // Charge pump off
+
+  if (oled->i2c)
+    mgos_i2c_close (oled->i2c);
+
+  if (oled->buffer)
+    free (oled->buffer);
+
+  free (oled);
+}
+
+void mgos_ssd1306_startup(struct mgos_ssd1306 *oled)
+{
   LOG (LL_DEBUG, ("Sending controller startup sequence"));
 
   _command (oled, 0xae);        // SSD1306_DISPLAYOFF
@@ -120,29 +149,6 @@ struct mgos_ssd1306 *mgos_ssd1306_create (const struct mgos_config_ssd1306 *cfg)
   _command (oled, 0xaf);        // SSD1306_DISPLAYON
 
   LOG (LL_INFO, ("SSD1306 init ok (width: %d, height: %d, address: 0x%02x)", oled->width, oled->height, oled->address));
-  return oled;
-
-out_err:
-  LOG (LL_ERROR, ("SSD1306 setup failed"));
-  free (oled);
-  return NULL;
-}
-
-void mgos_ssd1306_close (struct mgos_ssd1306 *oled) {
-  if (oled == NULL)
-    return;
-
-  _command (oled, 0xae);        // SSD_DISPLAYOFF
-  _command (oled, 0x8d);        // SSD1306_CHARGEPUMP
-  _command (oled, 0x10);        // Charge pump off
-
-  if (oled->i2c)
-    mgos_i2c_close (oled->i2c);
-
-  if (oled->buffer)
-    free (oled->buffer);
-
-  free (oled);
 }
 
 uint8_t mgos_ssd1306_get_width (struct mgos_ssd1306 *oled) {

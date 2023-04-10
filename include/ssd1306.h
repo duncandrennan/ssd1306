@@ -83,6 +83,14 @@ extern "C"
   void mgos_ssd1306_close (struct mgos_ssd1306 *oled);
 
   /**
+   * @brief Send the OLED startup sequence
+   *
+   * @param oled SSD1306 driver handle.
+   * 
+   */
+  void mgos_ssd1306_startup(struct mgos_ssd1306 *oled);
+
+  /**
    * @brief Get screen width.
    *
    * @param oled SSD1306 driver handle
